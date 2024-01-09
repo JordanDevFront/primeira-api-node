@@ -43,26 +43,15 @@ export class DataBasePostgres {
 
   async UserRegistration(user) {
     try {
-      const userId = randomUUID();
       const { username, senha, cpf_user } = user;
-
-      const entResult =
-        await sql`SELECT COUNT(*) as entCount FROM tbl_ent WHERE cpf = ${cpf_user}`;
-      const entRowCount = entResult[0].entCount;
-
-      if (entRowCount === 0) {
-        console.log("CPF fornecido não existe na tabela tbl_ent.");
-        return;
-      }
-
-      const userResult =
-        await sql`SELECT COUNT(*) as userCount FROM tbl_user WHERE cpf_user = ${cpf_user}`;
+      const userResult = await sql`SELECT COUNT(cpf_user) as userCount FROM tbl_user WHERE cpf_user = ${cpf_user}`;
       const userRowCount = userResult[0].userCount;
 
       if (userRowCount > 0) {
         console.log("Já existe um usuário com esse CPF.");
         return;
       } else {
+        const userId = randomUUID();
         await sql`INSERT INTO tbl_user (id_user, username, senha, cpf_user) VALUES (${userId}, ${username}, ${senha}, ${cpf_user})`;
       }
     } catch (error) {
