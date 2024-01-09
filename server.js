@@ -12,6 +12,7 @@ import { fastify } from "fastify";
 import { DataBasePostgres } from "./database-postgres.js";
 
 const server = fastify();
+import { sql } from "./db.js";
 
 const database = new DataBasePostgres();
 
@@ -54,6 +55,36 @@ server.delete("/videos/:id", async (request, reply) => {
   await database.delete(videoId);
 
   return reply.status(204).send();
+});
+
+
+/*API PROJETO*/
+server.post("/auth/register/", async (request, reply) => {
+  const { cpf, nome_completo, data_nasc, celular, email, cep, endereco, numero, bairro, cidade, uf } = request.body;
+
+  await database.personRegistration({
+    cpf, nome_completo, data_nasc, celular, email, cep, endereco, numero, bairro, cidade, uf 
+  });
+
+  return reply.status(201).send();
+});
+
+server.post("/auth/registerUser/", async (request, reply) => {
+  const { username, senha, cpf_user } = request.body;
+
+  if (!username) {
+    return console.log("Nome é obrigatório!");
+  }
+  if (!senha) {
+    return console.log("Senha é obrigatório!");
+  }
+
+  await database.UserRegistration({
+    username,
+    senha,
+    cpf_user,
+  });
+  return reply.status(201).send();
 });
 
 server.listen({

@@ -10,11 +10,40 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:3333/videos
+POST http://localhost:3333/auth/register/
+Content-Type: application/json
+
+{
+    "cpf": "44740347830",
+    "nome_completo": "Jordan Ribeiro Faustino",
+    "data_nasc": "12061996",
+    "celular": "(11)953891321",
+    "email": "jordanfaustino32@gmail.com",
+    "cep": "08081000",
+    "endereco": "Rua: Jesus de Nazaré",
+    "numero": "21",
+    "bairro": "Campo Limpo",
+    "cidade": "Itaquaquecetuba",
+    "uf": "SP"
+}
 
 ###
 
 
+POST http://localhost:3333/auth/registerUser/
+Content-Type: application/json
+
+{
+    "username": "teste",
+    "senha": "faus123",
+    "cpf_user": "44740347830"
+}
+
+###
+
+GET http://localhost:3333/videos
+
+###
 
 PUT http://localhost:3333/videos
 Content-Type: application/json
