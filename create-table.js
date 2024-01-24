@@ -4,26 +4,33 @@ import { sql } from "./db.js";
   console.log("Tabela Excluida!");
 }); */
 
-/*sql`
+sql`
 
 CREATE TABLE tbl_ent (
-    cpf TEXT PRIMARY KEY,
-    nome_completo TEXT,
-    data_nasc TEXT,
-    celular TEXT,
-    email TEXT,
-    cep TEXT,
-    endereco TEXT,
-    numero TEXT,
-    bairro TEXT,
-    cidade TEXT,
-    uf TEXT
+    cpf TEXT PRIMARY KEY not null,
+    nome_completo TEXT not null,
+    data_nasc TEXT not null,
+    celular TEXT not null,
+    email TEXT not null,
+    username TEXT not null,
+    senha TEXT not null,
+    cep TEXT not null,
+    endereco TEXT not null,
+    numero TEXT not null,
+    bairro TEXT not null,
+    cidade TEXT not null,
+    uf TEXT not null
 )
 `.then(() => {
   console.log("Tabela criada!");
+});
+
+
+/*sql`DROP TABLE IF EXISTS tbl_user`.then(() => {
+  console.log("Tabela Excluida!");
 });*/
 
-sql`
+/*sql`
 
 CREATE TABLE tbl_user (
   id_user TEXT PRIMARY KEY,          -- Chave primária autoincremental
@@ -36,9 +43,6 @@ CREATE TABLE tbl_user (
 );
 `.then(() => {
   console.log("Tabela criada!");
-});
-
-/*sql`DROP TABLE IF EXISTS tbl_user`.then(() => {
-  console.log("Tabela Excluida!");
 });*/
+
 
