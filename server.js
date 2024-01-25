@@ -1,18 +1,8 @@
-/*import { createServer } from "node:http";
-
-const server = createServer((request, response) => {
-  response.write("Oi");
-  return response.end();
-});
-
-server.listen(3333);*/
-
 import { fastify } from "fastify";
-//import { DataBaseMemory } from "./database-memory.js";
 import { DataBasePostgres } from "./database-postgres.js";
+import bcrypt from 'bcrypt';
 
 const server = fastify();
-import { sql } from "./db.js";
 
 const database = new DataBasePostgres();
 
@@ -57,6 +47,9 @@ server.delete("/videos/:id", async (request, reply) => {
   return reply.status(204).send();
 });
 
+/*FUNÇÕES */
+
+
 /*API PROJETO*/
 server.post("/auth/register/", async (request, response) => {
   const {
@@ -74,7 +67,6 @@ server.post("/auth/register/", async (request, response) => {
     cidade,
     uf,
   } = request.body;
-
     if (!cpf || cpf.trim() === "") {
       return response.status(400).send({ message: "Campo CPF é obrigatório!" });
     }
@@ -134,31 +126,48 @@ server.post("/auth/register/", async (request, response) => {
         .status(400)
         .send({ message: "Campo Estado é obrigatório!" });
     }
+    
 
     try {
-      await database.personRegistration({
-        cpf,
-        nome_completo,
-        data_nasc,
-        celular,
-        email,
-        username,
-        senha,
-        cep,
-        endereco,
-        numero,
-        bairro,
-        cidade,
-        uf,
-      });
-      return response
-        .status(201)
-        .send({ message: "Registro criado com sucesso." });
+      const existingUser = await database.registerUser({ username });
+      const existingEmail = await database.registerEmail({email})
+
+      if (existingUser && existingUser.length > 0) {
+        return response
+          .status(400)
+          .send({ message: "Nome de usuário já registrado na tabela!" });
+      }if(existingEmail && existingEmail.length > 0){
+        return response
+        .status(400)
+        .send({ message: "Já existe um usuário com esse Email, por favor digite outro email!" });
+      } else {
+        const hash = await bcrypt.hash(senha, 10);
+        await database.personRegistration({
+          cpf,
+          nome_completo,
+          data_nasc,
+          celular,
+          email,
+          username,
+          senha: hash,
+          cep,
+          endereco,
+          numero,
+          bairro,
+          cidade,
+          uf,
+        });
+        return response
+          .status(201)
+          .send({ message: "Registro criado com sucesso!" });
+      }
     } catch (error) {
-      return response
-        .status(500)
-        .send({ message: "Já existe um registro com este cpf na tabela." });
-    }   
+      console.error("Erro no servidor:", error);
+      return response.status(500).send({ message: "Erro no servidor!" });
+    }
+    
+    
+
 });
 
 server.get("/registrations", async (request) => {

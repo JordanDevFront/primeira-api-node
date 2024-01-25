@@ -35,7 +35,7 @@ export class DataBasePostgres {
   }
 
   /* API */
-  async personRegistration(pessoa, response) {
+  async personRegistration(pessoa) {
     const {
       cpf,
       nome_completo,
@@ -51,7 +51,17 @@ export class DataBasePostgres {
       cidade,
       uf,
     } = pessoa;
-        await sql`INSERT INTO tbl_ent (cpf, nome_completo, data_nasc, celular, email, username, senha, cep, endereco, numero, bairro, cidade, uf ) VALUES (${cpf}, ${nome_completo}, ${data_nasc}, ${celular}, ${email}, ${username}, ${senha}, ${cep}, ${endereco}, ${numero}, ${bairro}, ${cidade}, ${uf} )`;
+      await sql`INSERT INTO tbl_ent (cpf, nome_completo, data_nasc, celular, email, username, senha, cep, endereco, numero, bairro, cidade, uf ) VALUES (${cpf}, ${nome_completo}, ${data_nasc}, ${celular}, ${email}, ${username}, ${senha}, ${cep}, ${endereco}, ${numero}, ${bairro}, ${cidade}, ${uf} )`;
+  }
+  async registerUser(pessoa) {
+    const { username } = pessoa;
+    const result = await sql`SELECT * FROM tbl_ent WHERE username = ${username}`;
+    return result;
+  }
+  async registerEmail(pessoa){
+    const { email } = pessoa;
+    const result = await sql`SELECT * FROM tbl_ent WHERE email = ${email}`;
+    return result;
   }
 
   async listRegistrations(search){

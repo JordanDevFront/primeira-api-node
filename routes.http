@@ -14,18 +14,18 @@ POST http://localhost:3333/auth/register/
 Content-Type: application/json
 
 {
-    "cpf": "27840347678",
-    "nome_completo": "Maria Silva Santos",
-    "data_nasc": "11/02/1977",
-    "celular": "(11)953891321",
-    "email": "Joao32@gmail.com",
-    "username": "JoaoMar",
-    "senha": "teste123",
-    "cep": "08081000",
-    "endereco": "Rua: Jesus de Nazaré",
-    "numero": "21",
-    "bairro": "Campo Limpo",
-    "cidade": "Itaquaquecetuba",
+    "cpf": "02073347678",
+    "nome_completo": "Maria Faustino Santos",
+    "data_nasc": "18/12/1996",
+    "celular": "(11)000000000",
+    "email": "Fawwiaaa32@yahoo.com",
+    "username": "teste",
+    "senha": "testeR",
+    "cep": "0820045",
+    "endereco": "Rua: Yudá do Ó",
+    "numero": "1545",
+    "bairro": "JD helena",
+    "cidade": "São Paulo",
     "uf": "SP"
 }
 
