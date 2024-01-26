@@ -135,7 +135,7 @@ server.post("/auth/register/", async (request, response) => {
       if (existingUser && existingUser.length > 0) {
         return response
           .status(400)
-          .send({ message: "Nome de usuário já registrado na tabela!" });
+          .send({ message: "Nome de usuário já registrado!" });
       }if(existingEmail && existingEmail.length > 0){
         return response
         .status(400)
@@ -243,7 +243,7 @@ server.post("/resgister/category/", async (request, response) => {
 
 
 /*API PROJETO GET*/
-server.get("/registrations", async (request) => {
+server.get("/registrations/", async (request) => {
   const search = request.query.search;
 
   console.log(search);
