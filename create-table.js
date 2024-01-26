@@ -4,7 +4,7 @@ import { sql } from "./db.js";
   console.log("Tabela Excluida!");
 }); */
 
-sql`
+/*sql`
 
 CREATE TABLE tbl_ent (
     cpf TEXT PRIMARY KEY not null,
@@ -23,7 +23,7 @@ CREATE TABLE tbl_ent (
 )
 `.then(() => {
   console.log("Tabela criada!");
-});
+});*/
 
 
 /*sql`DROP TABLE IF EXISTS tbl_user`.then(() => {
@@ -37,12 +37,43 @@ CREATE TABLE tbl_user (
   username VARCHAR(50) NOT NULL,       -- Nome do usuário
   senha VARCHAR(50) NOT NULL,          -- Senha do usuário
   cpf_user VARCHAR(11) NOT NULL,       -- CPF do usuário
-
-  -- Definindo a chave estrangeira para a tabela tbl_ent
   FOREIGN KEY (cpf_user) REFERENCES tbl_ent(cpf)
 );
 `.then(() => {
   console.log("Tabela criada!");
 });*/
 
+
+/*sql`
+
+CREATE TABLE tbl_categoria (
+  id_cat INT PRIMARY KEY,
+  descricao VARCHAR(100) not null
+)
+`.then(() => {
+  console.log("Tabela criada!");
+});*/
+
+
+sql`
+
+CREATE TABLE tbl_prod (
+  id_prod TEXT PRIMARY KEY,
+  nome_prod VARCHAR(100) NOT NULL,
+  descricao VARCHAR(100) NOT NULL,
+  classificacao VARCHAR(30) NOT NULL,
+  id_categoria INT, -- Adicionando a coluna id_categoria
+  FOREIGN KEY (id_categoria) REFERENCES tbl_categoria(id_cat),
+  preco VARCHAR(20) NOT NULL,
+  qnt INT NOT NULL,
+  desconto VARCHAR(20),
+  preco_desconto VARCHAR(20),
+  qnt_parcelas INT NOT NULL,
+  valor_parcela VARCHAR(20),
+  frete INT NOT NULL,
+  valor_frete VARCHAR(20) NOT NULL
+);
+`.then(() => {
+  console.log("Tabela criada!");
+});
 

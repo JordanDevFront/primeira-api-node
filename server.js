@@ -50,7 +50,7 @@ server.delete("/videos/:id", async (request, reply) => {
 /*FUNÇÕES */
 
 
-/*API PROJETO*/
+/*API PROJETO POST*/
 server.post("/auth/register/", async (request, response) => {
   const {
     cpf,
@@ -129,8 +129,8 @@ server.post("/auth/register/", async (request, response) => {
     
 
     try {
-      const existingUser = await database.registerUser({ username });
-      const existingEmail = await database.registerEmail({email})
+      const existingUser = await database.tocheckUser({ username });
+      const existingEmail = await database.tocheckEmail({email})
 
       if (existingUser && existingUser.length > 0) {
         return response
@@ -170,6 +170,79 @@ server.post("/auth/register/", async (request, response) => {
 
 });
 
+server.post("/resgister/product/", async (request, response) => {
+  const {
+    id_prod,
+    nome_prod,
+    descricao,
+    classificacao,
+    id_categoria,
+    preco,
+    qnt,
+    desconto,
+    preco_desconto,
+    qnt_parcelas,
+    valor_parcela,
+    frete,
+    valor_frete,
+  } = request.body;
+
+  try {
+    await database.registerProd({
+      id_prod,
+      nome_prod,
+      descricao,
+      classificacao,
+      id_categoria,
+      preco,
+      qnt,
+      desconto,
+      preco_desconto,
+      qnt_parcelas,
+      valor_parcela,
+      frete,
+      valor_frete,
+    });
+    return response
+      .status(201)
+      .send({ message: "Registro criado com sucesso!" });
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    return response.status(500).send({ message: "Erro no servidor!" });
+  }
+});
+
+server.post("/resgister/category/", async (request, response) => {
+  const {
+    id_cat,
+    descricao
+
+  } = request.body;
+
+  try {
+    const existingCategoria = await database.tocheckCategoria({descricao})
+    if (existingCategoria && existingCategoria.length > 0){
+      return response
+      .status(400)
+      .send({ message: "Essa categoria já existe!" });
+    }else{
+      await database.registerCategory({
+        id_cat,
+        descricao
+      });
+      return response
+        .status(201)
+        .send({ message: "Registro criado com sucesso!" });
+    }
+    
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    return response.status(500).send({ message: "Erro no servidor!" });
+  }
+});
+
+
+/*API PROJETO GET*/
 server.get("/registrations", async (request) => {
   const search = request.query.search;
 
@@ -178,47 +251,6 @@ server.get("/registrations", async (request) => {
   console.log(videos);
   return videos;
 });
-
-/*server.post("/auth/registerUser/", async (request, reply) => {
-  const { username, senha, cpf_user } = request.body;
-
-  try {
-    if (!username || username.trim() === "") {
-      return reply
-        .status(400)
-        .send({ message: "Campo usuário é obrigatório!" });
-    }
-    if (!senha || senha.trim() === "") {
-      return reply.status(400).send({ message: "Campo senha é obrigatório!" });
-    }
-
-    verificarCPF({cpf_user})
-      .then((existe) => {
-        if (existe) {
-          console.log("CPF já existe na base de dados.");
-        } else {
-          console.log("CPF ainda não existe na base de dados.");
-        }
-      })
-      .catch((error) => {
-        console.error("Erro:", error);
-      });
-
-    await database.UserRegistration({
-      username,
-      senha,
-      cpf_user,
-    });
-
-    return reply
-      .status(201)
-      .send({ message: "Usuário registrado com sucesso!" });
-  } catch (error) {
-    return reply
-      .status(500)
-      .send({ message: "Ocorreu um erro interno no servidor." });
-  }
-});*/
 
 server.listen({
   port: 3333,
