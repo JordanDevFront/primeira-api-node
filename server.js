@@ -1,6 +1,9 @@
 import { fastify } from "fastify";
+import cors from "@fastify/cors"
 import { DataBasePostgres } from "./database-postgres.js";
 import bcrypt from 'bcrypt';
+
+
 
 const server = fastify();
 
@@ -252,6 +255,18 @@ server.get("/registrations/", async (request) => {
   return videos;
 });
 
-server.listen({
-  port: 3333,
+
+server.register(cors, {
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+});
+
+server.listen(8080, (err) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log('Servidor web habilitado para CORS escutando na porta 8080');
 });
