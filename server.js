@@ -244,6 +244,12 @@ server.post("/resgister/category/", async (request, response) => {
   }
 });
 
+/**
+ * server.post("auth/logar", async (request, response) => {
+
+})
+ */
+
 
 /*API PROJETO GET*/
 server.get("/registrations/", async (request) => {
@@ -255,6 +261,14 @@ server.get("/registrations/", async (request) => {
   return videos;
 });
 
+server.get("/products/", async (request) => {
+  const search = request.query.search;
+
+  console.log(search);
+  const prod = await database.listProd(search);
+  console.log(prod);
+  return prod;
+});
 
 server.register(cors, {
   origin: '*',

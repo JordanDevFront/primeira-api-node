@@ -19,7 +19,8 @@ CREATE TABLE tbl_ent (
     numero TEXT not null,
     bairro TEXT not null,
     cidade TEXT not null,
-    uf TEXT not null
+    uf TEXT not null,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 `.then(() => {
   console.log("Tabela criada!");
@@ -55,7 +56,7 @@ CREATE TABLE tbl_categoria (
 });*/
 
 
-sql`
+/*sql`
 
 CREATE TABLE tbl_prod (
   id_prod TEXT PRIMARY KEY,
@@ -71,9 +72,35 @@ CREATE TABLE tbl_prod (
   qnt_parcelas INT NOT NULL,
   valor_parcela VARCHAR(20),
   frete INT NOT NULL,
-  valor_frete VARCHAR(20) NOT NULL
+  valor_frete VARCHAR(20) NOT NULL,
+  data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 `.then(() => {
   console.log("Tabela criada!");
+});*/
+
+sql`
+
+CREATE TABLE tbl_ent_user_1 (
+    cpf TEXT PRIMARY KEY not null,
+    rg TEXT not null,
+    nome_completo TEXT not null,
+    data_nasc TEXT not null,
+    celular TEXT not null,
+    email TEXT not null,
+    cargo TEXT not null,
+    username TEXT not null,
+    senha TEXT not null,
+    cep TEXT not null,
+    endereco TEXT not null,
+    numero TEXT not null,
+    bairro TEXT not null,
+    cidade TEXT not null,
+    uf TEXT not null,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+`.then(() => {
+  console.log("Tabela criada!");
 });
+
 

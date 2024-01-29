@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import { sql } from "./db.js";
 
 //git rm --cached .env
@@ -35,7 +33,7 @@ export class DataBasePostgres {
     await sql`DELETE FROM videos WHERE id = ${id}`;
   }
 
-  /* API */
+  /* API  POST*/
   async personRegistration(pessoa) {
     const {
       cpf,
@@ -112,6 +110,7 @@ export class DataBasePostgres {
     return result
   }
 
+  //API GET
   async listRegistrations(search) {
     let pessoas;
     if (search) {
@@ -122,5 +121,17 @@ export class DataBasePostgres {
       pessoas = await sql`SELECT * FROM tbl_ent`;
     }
     return pessoas;
+  }
+
+  async listProd(search){
+    let produto;
+    if (search) {
+      produto = await sql`SELECT * FROM tbl_prod WHERE id_prod ilike ${
+        "%" + search + "%"
+      }`;
+    } else {
+      produto = await sql`SELECT * FROM tbl_prod`;
+    }
+    return produto;
   }
 }

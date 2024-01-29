@@ -46,19 +46,19 @@ POST http://localhost:8080/resgister/product/
 Content-Type: application/json
 
 {
-    "id_prod": 1,
-    "nome_prod": "Caneta Bic preta",
-    "descricao": "Caneta cor preta",
+    "id_prod": 2,
+    "nome_prod": "Kit de panelas antiaderente cor vermelha",
+    "descricao": "Panela anteaderente",
     "classificacao": "Novo",
     "id_categoria": 1,
-    "preco": "1.80",
+    "preco": "249,90",
     "qnt": 1,
     "desconto": "Sim",
-    "preco_desconto":"1.00",
-    "qnt_parcelas": 0,
-    "valor_parcela": "0.00",
+    "preco_desconto":"400.00",
+    "qnt_parcelas": 6,
+    "valor_parcela": "41.65",
     "frete": 1,
-    "valor_frete": "12.00"
+    "valor_frete": "24.90"
 }
 
 ###
@@ -75,6 +75,10 @@ Content-Type: application/json
 ###
 
 GET http://localhost:8080/videos
+
+###
+
+GET http://localhost:8080/products/
 
 ###
 
