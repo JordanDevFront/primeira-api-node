@@ -83,13 +83,32 @@ export class DataBasePostgres {
       frete,
       valor_frete) VALUES (${id_prod},${nome_prod}, ${descricao}, ${classificacao}, ${id_categoria}, ${preco}, ${qnt}, ${desconto}, ${preco_desconto}, ${qnt_parcelas}, ${valor_parcela}, ${frete}, ${valor_frete} )`;
   }
-  async registerCategory(cat){
-    const {
-      id_cat,
-      descricao
-    } = cat;
-    
+  async registerCategory(cat) {
+    const { id_cat, descricao } = cat;
+
     await sql`INSERT INTO tbl_categoria (id_cat, descricao) VALUES (${id_cat}, ${descricao})`;
+  }
+
+  async personRegistrationUser(pessoa) {
+    const {
+      cpf,
+      rg,
+      nome_completo,
+      nome_mae,
+      data_nasc,
+      celular,
+      email,
+      cargo,
+      username,
+      senha,
+      cep,
+      endereco,
+      numero,
+      bairro,
+      cidade,
+      uf,
+    } = pessoa;
+    await sql`INSERT INTO tbl_ent_user_1 (cpf, rg, nome_completo, nome_mae, data_nasc, celular, email, cargo, username, senha, cep, endereco, numero, bairro, cidade, uf ) VALUES (${cpf}, ${rg}, ${nome_completo}, ${nome_mae}, ${data_nasc}, ${celular}, ${email}, ${cargo}, ${username}, ${senha}, ${cep}, ${endereco}, ${numero}, ${bairro}, ${cidade}, ${uf} )`;
   }
 
   /*FUNÇÃO */
@@ -104,10 +123,23 @@ export class DataBasePostgres {
     const result = await sql`SELECT * FROM tbl_ent WHERE email = ${email}`;
     return result;
   }
-  async tocheckCategoria(category){
-    const {descricao} = category;
-    const result = await sql`SELECT * FROM tbl_categoria WHERE descricao = ${descricao}`;
-    return result
+  async tocheckUserUser(pessoa) {
+    const { username } = pessoa;
+    const result =
+      await sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`;
+    return result;
+  }
+  async tocheckUserUser(pessoa) {
+    const { email } = pessoa;
+    const result =
+      await sql`SELECT * FROM tbl_ent_user_1 WHERE email = ${email}`;
+    return result;
+  }
+  async tocheckCategoria(category) {
+    const { descricao } = category;
+    const result =
+      await sql`SELECT * FROM tbl_categoria WHERE descricao = ${descricao}`;
+    return result;
   }
 
   //API GET
@@ -123,7 +155,7 @@ export class DataBasePostgres {
     return pessoas;
   }
 
-  async listProd(search){
+  async listProd(search) {
     let produto;
     if (search) {
       produto = await sql`SELECT * FROM tbl_prod WHERE id_prod ilike ${

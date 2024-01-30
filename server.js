@@ -244,11 +244,81 @@ server.post("/resgister/category/", async (request, response) => {
   }
 });
 
-/**
- * server.post("auth/logar", async (request, response) => {
+server.post("/auth/registerUser/", async (request, response) => {
+  const {
+    cpf,
+    rg,
+    nome_completo,
+    nome_mae,
+    data_nasc,
+    celular,
+    email,
+    cargo,
+    username,
+    senha,
+    cep,
+    endereco,
+    numero,
+    bairro,
+    cidade,
+    uf,
+  } = request.body;  
 
-})
- */
+    try {
+        const hash = await bcrypt.hash(senha, 10);
+        await database.personRegistrationUser({
+          cpf,
+          rg,
+          nome_completo,
+          nome_mae,
+          data_nasc,
+          celular,
+          email,
+          cargo,
+          username,
+          senha:hash,
+          cep,
+          endereco,
+          numero,
+          bairro,
+          cidade,
+          uf,
+        });
+        return response
+          .status(201)
+          .send({ message: "Registro criado com sucesso!" });
+      }catch (error) {
+      console.error("Erro no servidor:", error);
+      return response.status(500).send({ message: "Erro no servidor!" });
+    }
+});
+
+
+server.post("/auth/logar/", async (request, response) => {
+  try {
+    const { username, senha } = request.body;
+    const user = await database.findOne({ where: username });
+
+    if (!user) {
+      return response.status(401).json({ error: 'Authentication failed' });
+    }
+
+    const passwordMatch = await bcrypt.compare(senha, user.password);
+
+    if (!passwordMatch) {
+      return response.status(401).json({ error: 'Authentication failed' });
+    }
+
+    const token = jwt.sign({ cpf: user.cpf }, 'your-secret-key', {
+      expiresIn: '1h',
+    });
+
+    response.status(200).json({ token });
+  } catch (error) {
+    response.status(500).json({ error: 'Login failed' });
+  }
+});
+
 
 
 /*API PROJETO GET*/

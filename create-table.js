@@ -85,6 +85,7 @@ CREATE TABLE tbl_ent_user_1 (
     cpf TEXT PRIMARY KEY not null,
     rg TEXT not null,
     nome_completo TEXT not null,
+    nome_mae TEXT not null,
     data_nasc TEXT not null,
     celular TEXT not null,
     email TEXT not null,

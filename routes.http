@@ -74,6 +74,45 @@ Content-Type: application/json
 
 ###
 
+###
+
+POST http://localhost:8080/auth/logar/
+Content-Type: application/json
+
+{
+    "username": "teste",
+    "senha": "12345"
+}
+
+###
+
+
+POST http://localhost:8080/auth/registerUser/
+Content-Type: application/json
+
+{
+    "cpf": "02073347678",
+    "rg": "38735305x",
+    "nome_completo": "Maria Faustino Santos",
+    "nome_mae": "Alaide Ribeiro Faustino",
+    "data_nasc": "18/12/1996",
+    "celular": "(11)000000000",
+    "email": "Fawwiaaa32@yahoo.com",
+    "cargo": "gerente",
+    "username": "teste",
+    "senha": "testeR",
+    "cep": "0820045",
+    "endereco": "Rua: Yudá do Ó",
+    "numero": "1545",
+    "bairro": "JD helena",
+    "cidade": "São Paulo",
+    "uf": "SP"
+}
+
+
+###
+
+###
 GET http://localhost:8080/videos
 
 ###
