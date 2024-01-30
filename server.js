@@ -2,8 +2,7 @@ import { fastify } from "fastify";
 import cors from "@fastify/cors"
 import { DataBasePostgres } from "./database-postgres.js";
 import bcrypt from 'bcrypt';
-
-
+import jwt from 'jsonwebtoken';
 
 const server = fastify();
 
@@ -293,30 +292,41 @@ server.post("/auth/registerUser/", async (request, response) => {
     }
 });
 
+const users = [
+  {
+    id: 1,
+    username: 'teste',
+    password: '$2b$10$7jxMe3aLWfB2FcEENej2T.Qp/mzr9d1uLYSLOIZVf7AayKTi0E3J6', // Senha: testeR
+  },
+];
 
-server.post("/auth/logar/", async (request, response) => {
-  try {
-    const { username, senha } = request.body;
-    const user = await database.findOne({ where: username });
+const AUTH_SECRET_KEY = 'your-secret-key';
 
-    if (!user) {
-      return response.status(401).json({ error: 'Authentication failed' });
-    }
+const generateToken = (user) => {
+  return jwt.sign({ id: user.id, username: user.username }, AUTH_SECRET_KEY, {
+    expiresIn: '1h',
+  });
+};
 
-    const passwordMatch = await bcrypt.compare(senha, user.password);
 
-    if (!passwordMatch) {
-      return response.status(401).json({ error: 'Authentication failed' });
-    }
+server.post("/auth/login", async (req, res) => {
+  const { username, password } = req.body;
 
-    const token = jwt.sign({ cpf: user.cpf }, 'your-secret-key', {
-      expiresIn: '1h',
-    });
+  const user = users.find((u) => u.username === username);
 
-    response.status(200).json({ token });
-  } catch (error) {
-    response.status(500).json({ error: 'Login failed' });
+  if (!user) {
+    return res.status(401).send({ error: "Usuário não encontrado" });
   }
+
+  bcrypt.compare(password, user.password, (err, result) => {
+    if (result) {
+      const token = generateToken(user);
+      res.status(200).send({ token });
+    } else {
+      res.status(401).send({ err });
+      console.log("Senhas não coincidem!");
+    }
+  });
 });
 
 
