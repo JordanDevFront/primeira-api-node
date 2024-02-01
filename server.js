@@ -3,6 +3,7 @@ import cors from "@fastify/cors"
 import { DataBasePostgres } from "./database-postgres.js";
 import bcrypt, { hash } from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { sql } from "./db.js";
 
 const server = fastify();
 
@@ -308,20 +309,23 @@ const generateToken = (user) => {
   });
 };
 
-server.post("/auth/login",  async (req, res) => {
+/*server.post("/auth/login",  async (req, res) => {
   const { username, senha } = req.body;
   //const user = users.find((u) => u.username === username);
 
-
   try {
-    const user = await database.getBaseTable(username);
-
+    const user = sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`
+    //database.getBaseTable({username});
     if (!user) {
       return res.status(401).send({ error: "Usuário não encontrado!" });
     }
+    //const result = senha && typeof senha === 'string' && user.senha ? await bcrypt.compare(senha, user.senha) : false;
+  
+    const result = await bcrypt.compare(senha, user.senha);
 
-    const result = senha && typeof senha === 'string' && user.senha ? await bcrypt.compare(senha, user.senha) : false;
-
+    console.error("senha ausente.");
+      console.log("senha do banco: ", user.senha)
+      console.log("senha digitada pelo usuário: ", senha)
 
     if (result) {
       const token = generateToken(user);
@@ -336,7 +340,37 @@ server.post("/auth/login",  async (req, res) => {
     console.error("Erro ao comparar as senhas:", error);
     return res.status(500).send({ error: "Erro interno do servidor" });
   }
+});*/
+
+server.post("/auth/login", async (req, res) => {
+  const { username, senha } = req.body;
+
+  try {
+    const queryResult =
+      await sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`;
+
+    // O queryResult é um objeto QueryBuilder, precisamos extrair os resultados
+    const user = queryResult[0];
+
+    if (!user) {
+      return res.status(401).send({ error: "Usuário não encontrado!" });
+    }
+
+    const result = await bcrypt.compare(senha, user.senha);
+
+    const listDados = [user.cpf, user.username, user.senha];
+
+    if (result) {
+      const token = generateToken(user);
+      return res.status(200).send({ token, "Dados do susuário:": listDados });
+    } else {
+      return res.status(401).send({ error: "Senha incorreta!" });
+    }
+  } catch (error) {
+    return res.status(500).send({ error: "Erro interno do servidor" });
+  }
 });
+
 
 
 
