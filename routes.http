@@ -80,8 +80,8 @@ POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-    "username": "teste",
-    "password": "testeR"
+    "username": "Jordan",
+    "senha": "jordan"
 }
 
 ###
@@ -91,7 +91,7 @@ POST http://localhost:8080/auth/registerUser/
 Content-Type: application/json
 
 {
-    "cpf": "02073347678",
+    "cpf": "22073347678",
     "rg": "38735305x",
     "nome_completo": "Maria Faustino Santos",
     "nome_mae": "Alaide Ribeiro Faustino",
@@ -99,8 +99,8 @@ Content-Type: application/json
     "celular": "(11)000000000",
     "email": "Fawwiaaa32@yahoo.com",
     "cargo": "gerente",
-    "username": "teste",
-    "senha": "testeR",
+    "username": "Jordan",
+    "senha": "jordan",
     "cep": "0820045",
     "endereco": "Rua: Yudá do Ó",
     "numero": "1545",

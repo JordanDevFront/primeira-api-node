@@ -155,6 +155,16 @@ export class DataBasePostgres {
     return pessoas;
   }
 
+  async getBaseTable(username) {
+    let user;
+    if (username) {
+      user = await sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`;
+    } else {
+      user = await sql`SELECT * FROM tbl_ent_user_1`;
+    }
+    return user;
+  }
+
   async listProd(search) {
     let produto;
     if (search) {

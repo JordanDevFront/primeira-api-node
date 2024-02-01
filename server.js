@@ -1,7 +1,7 @@
 import { fastify } from "fastify";
 import cors from "@fastify/cors"
 import { DataBasePostgres } from "./database-postgres.js";
-import bcrypt from 'bcrypt';
+import bcrypt, { hash } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const server = fastify();
@@ -294,40 +294,54 @@ server.post("/auth/registerUser/", async (request, response) => {
 
 const users = [
   {
-    id: 1,
+    cpf: 1,
     username: 'teste',
-    password: '$2b$10$7jxMe3aLWfB2FcEENej2T.Qp/mzr9d1uLYSLOIZVf7AayKTi0E3J6', // Senha: testeR
+    password: '$2b$10$F6xBIGGrQbk9Urr4ljLLEelwwHhBvVTO2DWjKvEOmSC6kzWUJE/YS', // Senha: testeR
   },
 ];
 
 const AUTH_SECRET_KEY = 'your-secret-key';
 
 const generateToken = (user) => {
-  return jwt.sign({ id: user.id, username: user.username }, AUTH_SECRET_KEY, {
+  return jwt.sign({ cpf: user.cpf, username: user.username }, AUTH_SECRET_KEY, {
     expiresIn: '1h',
   });
 };
 
+server.post("/auth/login",  async (req, res) => {
+  const { username, senha } = req.body;
+  //const user = users.find((u) => u.username === username);
 
-server.post("/auth/login", async (req, res) => {
-  const { username, password } = req.body;
 
-  const user = users.find((u) => u.username === username);
+  try {
+    const user = await database.getBaseTable(username);
 
-  if (!user) {
-    return res.status(401).send({ error: "Usuário não encontrado" });
-  }
+    if (!user) {
+      return res.status(401).send({ error: "Usuário não encontrado!" });
+    }
 
-  bcrypt.compare(password, user.password, (err, result) => {
+    const result = senha && typeof senha === 'string' && user.senha ? await bcrypt.compare(senha, user.senha) : false;
+
+
     if (result) {
       const token = generateToken(user);
-      res.status(200).send({ token });
+      console.log("Gerado o token")
+      return res.status(200).send({ token });
     } else {
-      res.status(401).send({ err });
-      console.log("Senhas não coincidem!");
+      console.error("Credenciais inválidas");
+      console.log("user:", user);
+      return res.status(401).send({ error: "Credenciais inválidas" });
     }
-  });
+  } catch (error) {
+    console.error("Erro ao comparar as senhas:", error);
+    return res.status(500).send({ error: "Erro interno do servidor" });
+  }
 });
+
+
+
+
+
 
 
 
