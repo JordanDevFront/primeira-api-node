@@ -125,6 +125,10 @@ GET http://localhost:8080/registrations/
 
 ###
 
+GET http://localhost:8080/registrations/
+Authorization: Bearer 
+###
+
 PUT http://localhost:8080/videos
 Content-Type: application/json
 

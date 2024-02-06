@@ -2,7 +2,7 @@ import { fastify } from "fastify";
 import cors from "@fastify/cors"
 import { DataBasePostgres } from "./database-postgres.js";
 import bcrypt, { hash } from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import { sql } from "./db.js";
 
 const server = fastify();
@@ -293,54 +293,35 @@ server.post("/auth/registerUser/", async (request, response) => {
     }
 });
 
-const users = [
-  {
-    cpf: 1,
-    username: 'teste',
-    password: '$2b$10$F6xBIGGrQbk9Urr4ljLLEelwwHhBvVTO2DWjKvEOmSC6kzWUJE/YS', // Senha: testeR
-  },
-];
-
-const AUTH_SECRET_KEY = 'your-secret-key';
+const SECRET = "123"
 
 const generateToken = (user) => {
-  return jwt.sign({ cpf: user.cpf, username: user.username }, AUTH_SECRET_KEY, {
-    expiresIn: '1h',
-  });
+  return jwt.sign({ cpf: user.cpf, username: user.username }, SECRET, {expiresIn: '1h'});
 };
 
-/*server.post("/auth/login",  async (req, res) => {
-  const { username, senha } = req.body;
-  //const user = users.find((u) => u.username === username);
-
+const verifyJWT = async (request, reply) => {
   try {
-    const user = sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`
-    //database.getBaseTable({username});
-    if (!user) {
-      return res.status(401).send({ error: "Usuário não encontrado!" });
-    }
-    //const result = senha && typeof senha === 'string' && user.senha ? await bcrypt.compare(senha, user.senha) : false;
-  
-    const result = await bcrypt.compare(senha, user.senha);
+    const authorizationHeader = request.headers['authorization'];
 
-    console.error("senha ausente.");
-      console.log("senha do banco: ", user.senha)
-      console.log("senha digitada pelo usuário: ", senha)
-
-    if (result) {
-      const token = generateToken(user);
-      console.log("Gerado o token")
-      return res.status(200).send({ token });
-    } else {
-      console.error("Credenciais inválidas");
-      console.log("user:", user);
-      return res.status(401).send({ error: "Credenciais inválidas" });
+    if (!authorizationHeader) {
+      return reply.status(401).send({ error: 'Token não fornecido' });
     }
-  } catch (error) {
-    console.error("Erro ao comparar as senhas:", error);
-    return res.status(500).send({ error: "Erro interno do servidor" });
+
+    const token = authorizationHeader.replace('Bearer ', ''); // Removendo o prefixo 'Bearer '
+
+    jwt.verify(token, SECRET, { algorithms: ['HS256'] }, (err, decoded) => {
+      if (err) {
+        console.error('Erro na verificação do token:', err);
+        return reply.status(401).send({ error: 'Token inválido' });
+      }
+
+      request.user = { cpf: decoded.cpf, username: decoded.username }; // Definindo o usuário no objeto de solicitação
+    });
+  } catch (err) {
+    console.error('Erro:', err);
+    return reply.status(500).send({ error: 'Erro interno do servidor' });
   }
-});*/
+};
 
 server.post("/auth/login", async (req, res) => {
   const { username, senha } = req.body;
@@ -348,8 +329,6 @@ server.post("/auth/login", async (req, res) => {
   try {
     const queryResult =
       await sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`;
-
-    // O queryResult é um objeto QueryBuilder, precisamos extrair os resultados
     const user = queryResult[0];
 
     if (!user) {
@@ -357,12 +336,13 @@ server.post("/auth/login", async (req, res) => {
     }
 
     const result = await bcrypt.compare(senha, user.senha);
-
-    const listDados = [user.cpf, user.username, user.senha];
+    //const listDados = [user.cpf, user.username, user.senha];
 
     if (result) {
       const token = generateToken(user);
-      return res.status(200).send({ token, "Dados do susuário:": listDados });
+      return res
+        .status(200)
+        .send({ auth: true, token, cpf: user.cpf, username: user.username });
     } else {
       return res.status(401).send({ error: "Senha incorreta!" });
     }
@@ -371,23 +351,24 @@ server.post("/auth/login", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
 /*API PROJETO GET*/
-server.get("/registrations/", async (request) => {
-  const search = request.query.search;
 
-  console.log(search);
-  const videos = await database.listRegistrations(search);
-  console.log(videos);
-  return videos;
+server.get("/registrations/", { preHandler: verifyJWT }, async (request, reply) => {
+  try {
+    const search = request.query.search;
+
+    const usuario = await database.listRegistrations(search);
+    //console.log(usuario);
+    //console.log(request.user.cpf + " fez esta chamada!"); // Acessando 'cpf' do usuário
+
+    return reply.send(usuario);
+  } catch (error) {
+    //console.error('Erro:', error);
+    return reply.status(500).send({ error: 'Erro interno do servidor' });
+  }
 });
+
+
 
 server.get("/products/", async (request) => {
   const search = request.query.search;
