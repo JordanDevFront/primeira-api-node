@@ -6,8 +6,32 @@ import jwt, { decode } from 'jsonwebtoken';
 import { sql } from "./db.js";
 
 const server = fastify();
-
 const database = new DataBasePostgres();
+const SECRET = "123"
+
+const generateToken = (user) => {
+  return jwt.sign({ cpf: user.cpf, username: user.username }, SECRET, {expiresIn: '1h'});
+};
+
+const verifyJWT = async (request, reply) => {
+  try {
+    const authorizationHeader = request.headers["authorization"];
+    if (!authorizationHeader) {
+      return reply.status(401).send({ error: "Token não fornecido" });
+    }
+    const token = authorizationHeader.replace("Bearer ", ""); // Removendo o prefixo 'Bearer '
+    jwt.verify(token, SECRET, { algorithms: ["HS256"] }, (err, decoded) => {
+      if (err) {
+        console.error("Erro na verificação do token:", err);
+        return reply.status(401).send({ error: "Token inválido" });
+      }
+      request.user = { cpf: decoded.cpf, username: decoded.username }; // Definindo o usuário no objeto de solicitação
+    });
+  } catch (err) {
+    console.error("Erro:", err);
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+};
 
 server.post("/videos", async (request, reply) => {
   const { title, description, duration } = request.body;
@@ -50,10 +74,7 @@ server.delete("/videos/:id", async (request, reply) => {
   return reply.status(204).send();
 });
 
-/*FUNÇÕES */
-
-
-/*API PROJETO POST*/
+/*Ecommerce POST*/
 server.post("/auth/register/", async (request, response) => {
   const {
     cpf,
@@ -173,78 +194,37 @@ server.post("/auth/register/", async (request, response) => {
 
 });
 
-server.post("/resgister/product/", async (request, response) => {
-  const {
-    id_prod,
-    nome_prod,
-    descricao,
-    classificacao,
-    id_categoria,
-    preco,
-    qnt,
-    desconto,
-    preco_desconto,
-    qnt_parcelas,
-    valor_parcela,
-    frete,
-    valor_frete,
-  } = request.body;
+
+//sistema de gerenciamento POST
+server.post("/auth/login", async (req, res) => {
+  const { username, senha } = req.body;
 
   try {
-    await database.registerProd({
-      id_prod,
-      nome_prod,
-      descricao,
-      classificacao,
-      id_categoria,
-      preco,
-      qnt,
-      desconto,
-      preco_desconto,
-      qnt_parcelas,
-      valor_parcela,
-      frete,
-      valor_frete,
-    });
-    return response
-      .status(201)
-      .send({ message: "Registro criado com sucesso!" });
-  } catch (error) {
-    console.error("Erro no servidor:", error);
-    return response.status(500).send({ message: "Erro no servidor!" });
-  }
-});
+    const queryResult =
+      await sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`;
+    const user = queryResult[0];
 
-server.post("/resgister/category/", async (request, response) => {
-  const {
-    id_cat,
-    descricao
-
-  } = request.body;
-
-  try {
-    const existingCategoria = await database.tocheckCategoria({descricao})
-    if (existingCategoria && existingCategoria.length > 0){
-      return response
-      .status(400)
-      .send({ message: "Essa categoria já existe!" });
-    }else{
-      await database.registerCategory({
-        id_cat,
-        descricao
-      });
-      return response
-        .status(201)
-        .send({ message: "Registro criado com sucesso!" });
+    if (!user) {
+      return res.status(401).send({ error: "Usuário não encontrado!" });
     }
-    
+
+    const result = await bcrypt.compare(senha, user.senha);
+    //const listDados = [user.cpf, user.username, user.senha];
+
+    if (result) {
+      const token = generateToken(user);
+      return res
+        .status(200)
+        .send({ auth: true, token, cpf: user.cpf, username: user.username });
+    } else {
+      return res.status(401).send({ error: "Senha incorreta!" });
+    }
   } catch (error) {
-    console.error("Erro no servidor:", error);
-    return response.status(500).send({ message: "Erro no servidor!" });
+    return res.status(500).send({ error: "Erro interno do servidor" });
   }
 });
 
-server.post("/auth/registerUser/", async (request, response) => {
+server.post("/auth/registerUser/", { preHandler: verifyJWT }, async (request, response) => {
   const {
     cpf,
     rg,
@@ -293,90 +273,99 @@ server.post("/auth/registerUser/", async (request, response) => {
     }
 });
 
-const SECRET = "123"
+server.post("/resgister/product/", { preHandler: verifyJWT }, async (request, response) => {
+  const {
+    id_prod,
+    nome_prod,
+    descricao,
+    classificacao,
+    id_categoria,
+    preco,
+    qnt,
+    desconto,
+    preco_desconto,
+    qnt_parcelas,
+    valor_parcela,
+    frete,
+    valor_frete,
+  } = request.body;
 
-const generateToken = (user) => {
-  return jwt.sign({ cpf: user.cpf, username: user.username }, SECRET, {expiresIn: '1h'});
-};
-
-const verifyJWT = async (request, reply) => {
   try {
-    const authorizationHeader = request.headers['authorization'];
-
-    if (!authorizationHeader) {
-      return reply.status(401).send({ error: 'Token não fornecido' });
-    }
-
-    const token = authorizationHeader.replace('Bearer ', ''); // Removendo o prefixo 'Bearer '
-
-    jwt.verify(token, SECRET, { algorithms: ['HS256'] }, (err, decoded) => {
-      if (err) {
-        console.error('Erro na verificação do token:', err);
-        return reply.status(401).send({ error: 'Token inválido' });
-      }
-
-      request.user = { cpf: decoded.cpf, username: decoded.username }; // Definindo o usuário no objeto de solicitação
+    await database.registerProd({
+      id_prod,
+      nome_prod,
+      descricao,
+      classificacao,
+      id_categoria,
+      preco,
+      qnt,
+      desconto,
+      preco_desconto,
+      qnt_parcelas,
+      valor_parcela,
+      frete,
+      valor_frete,
     });
-  } catch (err) {
-    console.error('Erro:', err);
-    return reply.status(500).send({ error: 'Erro interno do servidor' });
-  }
-};
-
-server.post("/auth/login", async (req, res) => {
-  const { username, senha } = req.body;
-
-  try {
-    const queryResult =
-      await sql`SELECT * FROM tbl_ent_user_1 WHERE username = ${username}`;
-    const user = queryResult[0];
-
-    if (!user) {
-      return res.status(401).send({ error: "Usuário não encontrado!" });
-    }
-
-    const result = await bcrypt.compare(senha, user.senha);
-    //const listDados = [user.cpf, user.username, user.senha];
-
-    if (result) {
-      const token = generateToken(user);
-      return res
-        .status(200)
-        .send({ auth: true, token, cpf: user.cpf, username: user.username });
-    } else {
-      return res.status(401).send({ error: "Senha incorreta!" });
-    }
+    return response
+      .status(201)
+      .send({ message: "Registro criado com sucesso!" });
   } catch (error) {
-    return res.status(500).send({ error: "Erro interno do servidor" });
+    console.error("Erro no servidor:", error);
+    return response.status(500).send({ message: "Erro no servidor!" });
   }
 });
 
-/*API PROJETO GET*/
+server.post("/resgister/category/", { preHandler: verifyJWT }, async (request, response) => {
+  const {
+    id_cat,
+    descricao
+  } = request.body;
 
+  try {
+    const existingCategoria = await database.tocheckCategoria({descricao})
+    if (existingCategoria && existingCategoria.length > 0){
+      return response
+      .status(400)
+      .send({ message: "Essa categoria já existe!" });
+    }else{
+      await database.registerCategory({
+        id_cat,
+        descricao
+      });
+      return response
+        .status(201)
+        .send({ message: "Registro criado com sucesso!" });
+    }
+    
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    return response.status(500).send({ message: "Erro no servidor!" });
+  }
+});
+
+/* Ecommerce GET */
 server.get("/registrations/", { preHandler: verifyJWT }, async (request, reply) => {
   try {
     const search = request.query.search;
 
     const usuario = await database.listRegistrations(search);
-    //console.log(usuario);
-    //console.log(request.user.cpf + " fez esta chamada!"); // Acessando 'cpf' do usuário
 
     return reply.send(usuario);
   } catch (error) {
-    //console.error('Erro:', error);
     return reply.status(500).send({ error: 'Erro interno do servidor' });
   }
 });
 
+/* Ecommerce e sistema de gerenciamento GET */
+server.get("/products/", { preHandler: verifyJWT }, async (request, reply) => {
+  try {
+    const search = request.query.search;
 
-
-server.get("/products/", async (request) => {
-  const search = request.query.search;
-
-  console.log(search);
-  const prod = await database.listProd(search);
-  console.log(prod);
-  return prod;
+    const prod = await database.listProd(search);
+    return reply.send(prod);
+  } catch {
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
 });
 
 server.register(cors, {
