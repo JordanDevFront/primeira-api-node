@@ -67,6 +67,7 @@ CREATE TABLE tbl_prod (
   FOREIGN KEY (id_categoria) REFERENCES tbl_categoria(id_cat),
   preco VARCHAR(20) NOT NULL,
   qnt INT NOT NULL,
+  peso VARCHAR(20),
   desconto VARCHAR(20),
   preco_desconto VARCHAR(20),
   qnt_parcelas INT NOT NULL,
@@ -79,7 +80,7 @@ CREATE TABLE tbl_prod (
   console.log("Tabela criada!");
 });*/
 
-sql`
+/*sql`
 
 CREATE TABLE tbl_ent_user_1 (
     cpf TEXT PRIMARY KEY not null,
@@ -102,6 +103,81 @@ CREATE TABLE tbl_ent_user_1 (
 )
 `.then(() => {
   console.log("Tabela criada!");
+});*/
+
+
+/*sql`
+
+CREATE TABLE tbl_pedido (
+  id_pedido TEXT PRIMARY KEY,
+  id_user_cpf VARCHAR(11),
+  nome_cliente VARCHAR(100),
+  celular VARCHAR(20),
+  email VARCHAR(100),
+  cep VARCHAR(10),
+  endereco VARCHAR(255),
+  numero VARCHAR(100),
+  bairro VARCHAR(100),
+  cidade VARCHAR(100),
+  estado_uf VARCHAR(100),
+  forma_pagamento VARCHAR(50),
+  status_pagamento VARCHAR(50),
+  frete DECIMAL(10, 2),
+  valor_frete DECIMAL(10, 2),
+  status_arquivo INT,
+  arquivo BYTEA,
+  status_envio INT,
+  status_envio_descricao VARCHAR(255),
+  array_produtos TEXT[],
+  status_pedido INT,
+  peso_total VARCHAR(100),
+  data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_user_cpf) REFERENCES tbl_ent(cpf)
+)
+`.then(() => {
+  console.log("Tabela criada!");
+});*/
+
+
+/**sql`DROP TABLE IF EXISTS tbl_pedido`.then(() => {
+  console.log("Tabela Excluida!");
+}); */
+
+
+/**sql`
+CREATE TABLE teste (
+  id TEXT PRIMARY KEY,          -- Chave primária autoincremental
+  title varchar(200),
+  array_produtos JSON DEFAULT NULL
+);
+`.then(() => {
+  console.log("Tabela criada!");
+}); */
+
+/*sql`
+
+CREATE TABLE order_details (
+  id TEXT PRIMARY KEY,          -- Chave primária autoincremental
+  title varchar(200),
+  product_details JSON DEFAULT NULL
+);
+`.then(() => {
+  console.log("Tabela criada!");
+});*/
+
+sql`
+create table orders(
+  id TEXT PRIMARY KEY, 
+  uuid varchar(200) NOT NULL,
+  storeId int NOT NULL,
+  product JSON DEFAULT NULL,
+  quantity int,
+  price DECIMAL(10,2) DEFAULT 0.00
+  );
+`.then(() => {
+  console.log("Tabela criada!");
 });
+
+
 
 

@@ -1,0 +1,6 @@
+* Arquivo já rastreado: Se o arquivo routes.http já foi rastreado pelo Git antes de ser adicionado ao 
+.gitignore, o Git continuará a rastreá-lo mesmo após adicioná-lo ao .gitignore. 
+Nesse caso, você precisa remover o arquivo do controle de versão do Git usando o comando git rm --cached routes.http. 
+Isso removerá o arquivo do controle de versão sem excluí-lo do sistema de arquivos local.
+
+* Se você deseja ignorar todos os arquivos com a extensão .http, pode usar um curinga:

@@ -1,4 +1,5 @@
 import { sql } from "./db.js";
+import { randomUUID } from "node:crypto";
 
 //git rm --cached .env
 
@@ -19,10 +20,17 @@ export class DataBasePostgres {
 
   async create(video) {
     const videoId = randomUUID();
-    const { title, description, duration } = video;
-
-    await sql`INSERT INTO videos (id, title, description, duration) VALUES (${videoId}, ${title}, ${description}, ${duration})`;
+    const { title, array_produtos } = video;
+    await sql`INSERT INTO teste (id, title, array_produtos) VALUES (${videoId}, ${title}, ${array_produtos})`;
   }
+
+  async createSend({ uuid, storeId, product, quantity, price }) {
+    const id = randomUUID();
+    await sql`INSERT INTO orders (id, uuid, storeId, product, quantity, price) VALUES (${id}, ${uuid}, ${storeId}, ${product}, ${quantity}, ${price})`;
+    return id; // Retorna o ID do item inserido
+  }
+  
+  
 
   async update(id, video) {
     const { title, description, duration } = video;
@@ -53,14 +61,15 @@ export class DataBasePostgres {
     await sql`INSERT INTO tbl_ent (cpf, nome_completo, data_nasc, celular, email, username, senha, cep, endereco, numero, bairro, cidade, uf ) VALUES (${cpf}, ${nome_completo}, ${data_nasc}, ${celular}, ${email}, ${username}, ${senha}, ${cep}, ${endereco}, ${numero}, ${bairro}, ${cidade}, ${uf} )`;
   }
   async registerProd(prod) {
+    const idProd = randomUUID();
     const {
-      id_prod,
       nome_prod,
       descricao,
       classificacao,
       id_categoria,
       preco,
       qnt,
+      peso,
       desconto,
       preco_desconto,
       qnt_parcelas,
@@ -76,19 +85,20 @@ export class DataBasePostgres {
       id_categoria,
       preco,
       qnt,
+      peso,
       desconto,
       preco_desconto,
       qnt_parcelas,
       valor_parcela,
       frete,
-      valor_frete) VALUES (${id_prod},${nome_prod}, ${descricao}, ${classificacao}, ${id_categoria}, ${preco}, ${qnt}, ${desconto}, ${preco_desconto}, ${qnt_parcelas}, ${valor_parcela}, ${frete}, ${valor_frete} )`;
+      valor_frete) VALUES (${idProd},${nome_prod}, ${descricao}, ${classificacao}, ${id_categoria}, ${preco}, ${qnt}, ${peso}, ${desconto}, ${preco_desconto}, ${qnt_parcelas}, ${valor_parcela}, ${frete}, ${valor_frete} )`;
   }
   async registerCategory(cat) {
-    const { id_cat, descricao } = cat;
+    const idCategoria = randomUUID();
+    const { descricao } = cat;
 
-    await sql`INSERT INTO tbl_categoria (id_cat, descricao) VALUES (${id_cat}, ${descricao})`;
+    await sql`INSERT INTO tbl_categoria (id_cat, descricao) VALUES (${idCategoria}, ${descricao})`;
   }
-
   async personRegistrationUser(pessoa) {
     const {
       cpf,
@@ -110,6 +120,91 @@ export class DataBasePostgres {
     } = pessoa;
     await sql`INSERT INTO tbl_ent_user_1 (cpf, rg, nome_completo, nome_mae, data_nasc, celular, email, cargo, username, senha, cep, endereco, numero, bairro, cidade, uf ) VALUES (${cpf}, ${rg}, ${nome_completo}, ${nome_mae}, ${data_nasc}, ${celular}, ${email}, ${cargo}, ${username}, ${senha}, ${cep}, ${endereco}, ${numero}, ${bairro}, ${cidade}, ${uf} )`;
   }
+  async orderPending(pedido){
+    const idPedido = randomUUID();
+    const {
+      nome_cliente,
+      celular,
+      email,
+      cep,
+      endereco,
+      numero,
+      bairro,
+      cidade,
+      estado_uf,
+      forma_pagamento,
+      status_pagamento,
+      frete,
+      valor_frete,
+      status_arquivo,
+      arquivo,
+      status_envio,
+      status_envio_descricao,
+      array_produtos,
+      status_pedido,
+      peso_total,
+      valor_total,
+    } = pedido;
+  
+    // Mapear os produtos corretamente
+    const produtosMapeados = array_produtos.map(({ id_prod, nome_produto, qnt, preco_unit, peso }) => ({
+      id_prod,
+      nome_produto,
+      qnt,
+      preco_unit,
+      peso
+    }));
+  
+    await sql`INSERT INTO tbl_pedido(
+      id_pedido,
+      id_user_cpf,
+      nome_cliente,
+      celular,
+      email,
+      cep,
+      endereco,
+      numero,
+      bairro,
+      cidade,
+      estado_uf,
+      forma_pagamento,
+      status_pagamento,
+      frete,
+      valor_frete,
+      status_arquivo,
+      arquivo,
+      status_envio,
+      status_envio_descricao,
+      array_produtos,
+      status_pedido,
+      peso_total,
+      valor_total
+    ) VALUES (
+      ${idPedido}, 
+      ${nome_cliente}, 
+      ${celular}, 
+      ${email}, 
+      ${cep}, 
+      ${endereco}, 
+      ${numero}, 
+      ${bairro}, 
+      ${cidade}, 
+      ${estado_uf}, 
+      ${forma_pagamento}, 
+      ${status_pagamento}, 
+      ${frete}, 
+      ${valor_frete}, 
+      ${status_arquivo}, 
+      ${arquivo}, 
+      ${status_envio}, 
+      ${status_envio_descricao}, 
+      ${JSON.stringify(produtosMapeados)},  -- Convertendo para JSON antes de inserir
+      ${status_pedido}, 
+      ${peso_total}, 
+      ${valor_total}
+    )`;
+  }
+  
 
   /*FUNÇÃO */
   async tocheckUser(pessoa) {
@@ -151,6 +246,18 @@ export class DataBasePostgres {
       }`;
     } else {
       pessoas = await sql`SELECT * FROM tbl_ent`;
+    }
+    return pessoas;
+  }
+
+  async listPedidosPendente(search){
+    let pedido;
+    if (search) {
+      pedido = await sql`SELECT * FROM tbl_pedido WHERE id_pedido ilike ${
+        "%" + search + "%"
+      }`;
+    } else {
+      pessoas = await sql`SELECT * FROM tbl_pedido`;
     }
     return pessoas;
   }
