@@ -24,14 +24,6 @@ export class DataBasePostgres {
     await sql`INSERT INTO teste (id, title, array_produtos) VALUES (${videoId}, ${title}, ${array_produtos})`;
   }
 
-  async createSend({ uuid, storeId, product, quantity, price }) {
-    const id = randomUUID();
-    await sql`INSERT INTO orders (id, uuid, storeId, product, quantity, price) VALUES (${id}, ${uuid}, ${storeId}, ${product}, ${quantity}, ${price})`;
-    return id; // Retorna o ID do item inserido
-  }
-  
-  
-
   async update(id, video) {
     const { title, description, duration } = video;
     await sql`UPDATE videos set title = ${title}, description = ${description}, duration = ${duration} WHERE id = ${id}`;
@@ -120,91 +112,31 @@ export class DataBasePostgres {
     } = pessoa;
     await sql`INSERT INTO tbl_ent_user_1 (cpf, rg, nome_completo, nome_mae, data_nasc, celular, email, cargo, username, senha, cep, endereco, numero, bairro, cidade, uf ) VALUES (${cpf}, ${rg}, ${nome_completo}, ${nome_mae}, ${data_nasc}, ${celular}, ${email}, ${cargo}, ${username}, ${senha}, ${cep}, ${endereco}, ${numero}, ${bairro}, ${cidade}, ${uf} )`;
   }
-  async orderPending(pedido){
-    const idPedido = randomUUID();
-    const {
-      nome_cliente,
-      celular,
-      email,
-      cep,
-      endereco,
-      numero,
-      bairro,
-      cidade,
-      estado_uf,
-      forma_pagamento,
-      status_pagamento,
-      frete,
-      valor_frete,
-      status_arquivo,
-      arquivo,
-      status_envio,
-      status_envio_descricao,
-      array_produtos,
-      status_pedido,
-      peso_total,
-      valor_total,
-    } = pedido;
-  
-    // Mapear os produtos corretamente
-    const produtosMapeados = array_produtos.map(({ id_prod, nome_produto, qnt, preco_unit, peso }) => ({
-      id_prod,
-      nome_produto,
-      qnt,
-      preco_unit,
-      peso
-    }));
-  
-    await sql`INSERT INTO tbl_pedido(
-      id_pedido,
-      id_user_cpf,
-      nome_cliente,
-      celular,
-      email,
-      cep,
-      endereco,
-      numero,
-      bairro,
-      cidade,
-      estado_uf,
-      forma_pagamento,
-      status_pagamento,
-      frete,
-      valor_frete,
-      status_arquivo,
-      arquivo,
-      status_envio,
-      status_envio_descricao,
-      array_produtos,
-      status_pedido,
-      peso_total,
-      valor_total
-    ) VALUES (
-      ${idPedido}, 
-      ${nome_cliente}, 
-      ${celular}, 
-      ${email}, 
-      ${cep}, 
-      ${endereco}, 
-      ${numero}, 
-      ${bairro}, 
-      ${cidade}, 
-      ${estado_uf}, 
-      ${forma_pagamento}, 
-      ${status_pagamento}, 
-      ${frete}, 
-      ${valor_frete}, 
-      ${status_arquivo}, 
-      ${arquivo}, 
-      ${status_envio}, 
-      ${status_envio_descricao}, 
-      ${JSON.stringify(produtosMapeados)},  -- Convertendo para JSON antes de inserir
-      ${status_pedido}, 
-      ${peso_total}, 
-      ${valor_total}
-    )`;
+  async orderPending({
+    id_user_cpf,
+    forma_pagamento,
+    status_pagamento,
+    frete,
+    valor_frete,
+    status_arquivo,
+    arquivo,
+    status_envio,
+    status_envio_descricao,
+    array_produtos,
+    status_pedido,
+    peso_total,
+    valor_total,
+  }) {
+    const id = randomUUID();
+    await sql`INSERT INTO tbl_pedido (id_pedido, id_user_cpf, forma_pagamento, status_pagamento, frete, valor_frete, status_arquivo, arquivo, status_envio, status_envio_descricao, array_produtos, status_pedido, peso_total, valor_total) VALUES (${id}, ${id_user_cpf}, ${forma_pagamento}, ${status_pagamento}, ${frete}, ${valor_frete}, ${status_arquivo}, ${arquivo}, ${status_envio}, ${status_envio_descricao}, ${array_produtos}, ${status_pedido}, ${peso_total}, ${valor_total})`;
+    return id;
   }
-  
+
+  async createSend({ uuid, storeId, product, quantity, price }) {
+    const id = randomUUID();
+    await sql`INSERT INTO orders (id, uuid, storeId, product, quantity, price) VALUES (${id}, ${uuid}, ${storeId}, ${product}, ${quantity}, ${price})`;
+    return id; // Retorna o ID do item inserido
+  }
 
   /*FUNÇÃO */
   async tocheckUser(pessoa) {
@@ -250,16 +182,16 @@ export class DataBasePostgres {
     return pessoas;
   }
 
-  async listPedidosPendente(search){
+  async listPedidosPendente(search) {
     let pedido;
     if (search) {
       pedido = await sql`SELECT * FROM tbl_pedido WHERE id_pedido ilike ${
         "%" + search + "%"
       }`;
     } else {
-      pessoas = await sql`SELECT * FROM tbl_pedido`;
+      pedido = await sql`SELECT * FROM tbl_pedido`;
     }
-    return pessoas;
+    return pedido;
   }
 
   async listProd(search) {

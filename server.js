@@ -227,43 +227,9 @@ server.post("/resgister/category/", { preHandler: verifyJWT }, async (request, r
 });
 
 server.post("/pending/orders/", async (request, response) => {
-  const {
-    id_user_cpf,
-    nome_cliente,
-    celular,
-    email,
-    cep,
-    endereco,
-    numero,
-    bairro,
-    cidade,
-    estado_uf,
-    forma_pagamento,
-    status_pagamento,
-    frete,
-    valor_frete,
-    status_arquivo = 1, // aqui ele vem sempre como 1, pois o objeto arquivo estará null, quando ele fora alterado o status_arquivo altera para 2
-    arquivo,
-    status_envio,
-    status_envio_descricao,
-    array_produtos,
-    status_pedido,
-    peso_total,
-    valor_total
-  } = request.body;
-
   try {
-    await database.orderPending({
+    const {
       id_user_cpf,
-      nome_cliente,
-      celular,
-      email,
-      cep,
-      endereco,
-      numero,
-      bairro,
-      cidade,
-      estado_uf,
       forma_pagamento,
       status_pagamento,
       frete,
@@ -272,51 +238,67 @@ server.post("/pending/orders/", async (request, response) => {
       arquivo,
       status_envio,
       status_envio_descricao,
-      array_produtos: array_produtos.map(({ id_prod, nome_produto, qnt, preco_unit, peso }) => ({
-        id_prod,
-        nome_produto,
-        qnt,
-        preco_unit,
-        peso
-      })),
+      array_produtos,
       status_pedido,
       peso_total,
-      valor_total
+      valor_total,
+    } = request.body;
+
+    
+    const produtos = array_produtos.map(item => ({
+      id_prod: item.id_prod,
+      descricao: item.descricao,
+      qnt: item.qnt,
+      vl_preco: item.vl_preco,
+      peso_item: item.peso_item,
+      peso_tl_qnt: item.qnt * item.peso_item,
+      vl_total_item_qnt: item.qnt * item.vl_preco
+    }));
+    
+    const itens = { produtos };
+    const queryProd = await sql`SELECT * FROM tbl_prod WHERE id_prod = ${itens.produtos[0].id_prod}`;
+    if (queryProd.length === 0) {
+      return response.status(401).send({ error: "Produto não encontrado!" });
+    }
+
+    const orderId = await database.orderPending({
+      id_user_cpf,
+      forma_pagamento,
+      status_pagamento,
+      frete,
+      valor_frete,
+      status_arquivo,
+      arquivo,
+      status_envio,
+      status_envio_descricao,
+      array_produtos: JSON.stringify(itens),
+      status_pedido,
+      peso_total,
+      valor_total,
     });
-    return response
-      .status(201)
-      .send({ message: "Compra efetuada com sucesso!" });
-  } catch (error) {
-    console.error("Erro no servidor:", error);
-    return response.status(500).send({ message: "Erro no servidor!" });
-  }
-});
 
+    const queryResult =
+      await sql`SELECT * FROM tbl_ent WHERE cpf = ${id_user_cpf}`;
+    const user = queryResult[0];
 
-server.post("/teste/teste/", async (request, response) => {
-  try {
-    const { title, array_produtos } = request.body;
-
-    const orderDetails = array_produtos.map((item) => [
-      title,
-      JSON.stringify(item)
-    ]);
-
-    // Inserindo o registro principal
-    await database.create({
-      title,
-      array_produtos
+    if (!user) {
+      return response.status(401).send({ error: "Usuário não encontrado!" });
+    }
+    return response.status(201).send({
+      message: "Registro(s) criado(s) com sucesso!",
+      orderId,
+      array_produtos,
+      cpf: user.cpf,
+      nome_completo: user.nome_completo,
+      celular: user.celular,
+      email: user.email,
+      cep: user.cep,
+      endereco: user.endereco,
+      numero: user.numero,
+      bairro: user.bairro,
+      cidade: user.cidade,
+      uf: user.uf,
     });
-
-    // Inserindo detalhes do pedido
-    const query = "INSERT INTO order_details (title, product_details) VALUES ?";
-
-    // Supondo que `connection` é sua conexão com o banco de dados
-    await sql.query(query, [orderDetails]);
-
-    return response
-      .status(201)
-      .send({ message: "Registro criado com sucesso!" });
   } catch (error) {
     console.error("Erro no servidor:", error);
     return response.status(500).send({ message: "Erro no servidor!" });

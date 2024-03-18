@@ -165,7 +165,7 @@ CREATE TABLE order_details (
   console.log("Tabela criada!");
 });*/
 
-sql`
+/*sql`
 create table orders(
   id TEXT PRIMARY KEY, 
   uuid varchar(200) NOT NULL,
@@ -176,7 +176,40 @@ create table orders(
   );
 `.then(() => {
   console.log("Tabela criada!");
+});*/
+
+
+sql`
+
+CREATE TABLE tbl_pedido (
+  id_pedido TEXT PRIMARY KEY,
+
+  id_user_cpf VARCHAR(11), -- com o id_cpf eu vou trazer todas as informações do usuário, endereço e dados pessoais
+
+  forma_pagamento VARCHAR(50),
+  status_pagamento VARCHAR(50),
+  frete DECIMAL(10, 2),
+  valor_frete DECIMAL(10, 2),
+  status_arquivo INT,
+  arquivo BYTEA,
+  status_envio INT,
+  status_envio_descricao VARCHAR(255),
+
+  array_produtos JSON DEFAULT NULL,  -- array[id_prod, decricao, qnt, vl_preco ]
+
+  status_pedido INT,
+  peso_total DECIMAL(10, 2),
+  valor_total DECIMAL(10, 2),
+
+  data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_user_cpf) REFERENCES tbl_ent(cpf)
+)
+`.then(() => {
+  console.log("Tabela criada!");
 });
+
+
+
 
 
 
