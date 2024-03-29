@@ -2,7 +2,7 @@ import { fastify } from "fastify";
 import cors from "@fastify/cors"
 import { DataBasePostgres } from "./database-postgres.js";
 import bcrypt, { hash } from 'bcrypt';
-import jwt, { decode } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { sql } from "./db.js";
 import { randomUUID } from "node:crypto";
 
@@ -34,45 +34,73 @@ const verifyJWT = async (request, reply) => {
   }
 };
 
-/**server.post("/videos", async (request, reply) => {
-  const { title, description, duration } = request.body;
 
-  await database.create({
-    title,
-    description,
-    duration,
-  });
+/* POST CADASTRO DE PRODUTOS */
+server.post(
+  "/registrar/novo/produto/",
+  { preHandler: verifyJWT },
+  async (request, response) => {
+    const {
+      id_prod,
+      nome_prod,
+      descricao,
+      classificacao,
+      img,
+      id_categoria,
+      preco,
+      qnt,
+      qnt_em_estoque,
+      peso,
+      desconto,
+      preco_desconto,
+      qnt_parcelas,
+      juros_parcela,
+      valor_parcela,
+      frete,
+      valor_frete,
+    } = request.body;
 
-  return reply.status(201).send();
-}); */
+    try {
+      await database.cadastroDeProdutos({
+        id_prod,
+        nome_prod,
+        descricao,
+        classificacao,
+        img,
+        id_categoria,
+        preco,
+        qnt,
+        qnt_em_estoque,
+        peso,
+        desconto,
+        preco_desconto,
+        qnt_parcelas,
+        juros_parcela,
+        valor_parcela,
+        frete,
+        valor_frete,
+      });
+      return response
+        .status(201)
+        .send({ message: "Registro criado com sucesso!" });
+    } catch (error) {
+      console.error("Erro no servidor:", error);
+      return response.status(500).send({ message: "Erro no servidor!" });
+    }
+  }
+);
 
-server.get("/videos", async (request) => {
-  const search = request.query.search;
+/** GET LISTA DE PRODUTOS CADASTRADO */
 
-  console.log(search);
-  const videos = await database.list(search);
-  console.log(videos);
-  return videos;
-});
+server.get("/lista/prdoutos", { preHandler: verifyJWT }, async (request, reply) => {
+  try {
+    const search = request.query.search;
 
-server.put("/videos/:id", async (request, reply) => {
-  const videoId = request.params.id;
-  const { title, description, duration } = request.body;
-
-  await database.update(videoId, {
-    title,
-    description,
-    duration,
-  });
-  return reply.status(204).send();
-});
-
-server.delete("/videos/:id", async (request, reply) => {
-  const videoId = request.params.id;
-
-  await database.delete(videoId);
-
-  return reply.status(204).send();
+    const prod = await database.listaDeProdCadatrado(search);
+    return reply.send(prod);
+  } catch {
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
 });
 
 
@@ -152,50 +180,6 @@ server.post("/auth/registerUser/", { preHandler: verifyJWT }, async (request, re
       console.error("Erro no servidor:", error);
       return response.status(500).send({ message: "Erro no servidor!" });
     }
-});
-
-server.post("/resgister/product/", { preHandler: verifyJWT }, async (request, response) => {
-  const {
-    id_prod,
-    nome_prod,
-    descricao,
-    classificacao,
-    id_categoria,
-    preco,
-    qnt,
-    peso,
-    desconto,
-    preco_desconto,
-    qnt_parcelas,
-    valor_parcela,
-    frete,
-    valor_frete,
-  } = request.body;
-
-  try {
-    await database.registerProd({
-      id_prod,
-      nome_prod,
-      descricao,
-      classificacao,
-      id_categoria,
-      preco,
-      qnt,
-      peso,
-      desconto,
-      preco_desconto,
-      qnt_parcelas,
-      valor_parcela,
-      frete,
-      valor_frete,
-    });
-    return response
-      .status(201)
-      .send({ message: "Registro criado com sucesso!" });
-  } catch (error) {
-    console.error("Erro no servidor:", error);
-    return response.status(500).send({ message: "Erro no servidor!" });
-  }
 });
 
 server.post("/resgister/category/", { preHandler: verifyJWT }, async (request, response) => {
@@ -472,8 +456,6 @@ server.post("/auth/register/", async (request, response) => {
     
 
 });
-
-
 
 /* Ecommerce e sistema de gerenciamento GET */
 server.get("/products/", { preHandler: verifyJWT }, async (request, reply) => {

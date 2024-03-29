@@ -4,3 +4,64 @@ Nesse caso, você precisa remover o arquivo do controle de versão do Git usando
 Isso removerá o arquivo do controle de versão sem excluí-lo do sistema de arquivos local.
 
 * Se você deseja ignorar todos os arquivos com a extensão .http, pode usar um curinga:
+
+
+
+
+server.get("/videos", async (request) => {
+  const search = request.query.search;
+
+  console.log(search);
+  const videos = await database.list(search);
+  console.log(videos);
+  return videos;
+});
+
+server.put("/videos/:id", async (request, reply) => {
+  const videoId = request.params.id;
+  const { title, description, duration } = request.body;
+
+  await database.update(videoId, {
+    title,
+    description,
+    duration,
+  });
+  return reply.status(204).send();
+});
+
+server.delete("/videos/:id", async (request, reply) => {
+  const videoId = request.params.id;
+
+  await database.delete(videoId);
+
+  return reply.status(204).send();
+});
+
+
+
+  async list(search) {
+    let videos;
+    if (search) {
+      videos = await sql`SELECT * FROM videos WHERE title ilike ${
+        "%" + search + "%"
+      }`;
+    } else {
+      videos = await sql`SELECT * FROM videos`;
+    }
+    return videos;
+  }
+
+  async create(video) {
+    const videoId = randomUUID();
+    const { title, array_produtos } = video;
+    await sql`INSERT INTO teste (id, title, array_produtos) VALUES (${videoId}, ${title}, ${array_produtos})`;
+  }
+
+  async update(id, video) {
+    const { title, description, duration } = video;
+    await sql`UPDATE videos set title = ${title}, description = ${description}, duration = ${duration} WHERE id = ${id}`;
+  }
+
+  async delete(id) {
+    await sql`DELETE FROM videos WHERE id = ${id}`;
+  }

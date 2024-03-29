@@ -6,31 +6,56 @@ import { randomUUID } from "node:crypto";
 export class DataBasePostgres {
   #videos = new Map();
 
-  async list(search) {
-    let videos;
+  /* CADASTRO DE PRODUTOS */
+  async cadastroDeProdutos(prod) {
+    const idProd = randomUUID();
+    const {
+      nome_prod,
+      descricao,
+      classificacao,
+      img,
+      id_categoria,
+      preco,
+      qnt,
+      qnt_em_estoque,
+      peso,
+      desconto,
+      preco_desconto,
+      qnt_parcelas,
+      juros_parcela,
+      valor_parcela,
+      frete,
+      valor_frete,
+    } = prod;
+    await sql`INSERT INTO tbl_produtos (
+      id_prod,
+      nome_prod,
+      descricao,
+      classificacao,
+      img,
+      id_categoria,
+      preco,
+      qnt,
+      qnt_em_estoque,
+      peso, desconto, preco_desconto,
+      qnt_parcelas,
+      juros_parcela,
+      valor_parcela,
+      frete,
+      valor_frete) VALUES (${idProd},${nome_prod}, ${descricao}, ${classificacao}, ${img}, ${id_categoria}, ${preco}, ${qnt}, ${qnt_em_estoque}, ${peso}, ${desconto}, ${preco_desconto}, ${qnt_parcelas}, ${juros_parcela}, ${valor_parcela}, ${frete}, ${valor_frete} )`;
+  }
+
+  /** LISTA DE PRODUTOS CADASTRADO */
+  async listaDeProdCadatrado(search) {
+    let produto;
     if (search) {
-      videos = await sql`SELECT * FROM videos WHERE title ilike ${
+      produto = await sql`SELECT * FROM tbl_produtos WHERE id_prod ilike ${
         "%" + search + "%"
       }`;
     } else {
-      videos = await sql`SELECT * FROM videos`;
+      produto = await sql`SELECT * FROM tbl_produtos`;
     }
-    return videos;
-  }
-
-  async create(video) {
-    const videoId = randomUUID();
-    const { title, array_produtos } = video;
-    await sql`INSERT INTO teste (id, title, array_produtos) VALUES (${videoId}, ${title}, ${array_produtos})`;
-  }
-
-  async update(id, video) {
-    const { title, description, duration } = video;
-    await sql`UPDATE videos set title = ${title}, description = ${description}, duration = ${duration} WHERE id = ${id}`;
-  }
-
-  async delete(id) {
-    await sql`DELETE FROM videos WHERE id = ${id}`;
+    return produto;
   }
 
   /* API  POST*/
@@ -52,39 +77,7 @@ export class DataBasePostgres {
     } = pessoa;
     await sql`INSERT INTO tbl_ent (cpf, nome_completo, data_nasc, celular, email, username, senha, cep, endereco, numero, bairro, cidade, uf ) VALUES (${cpf}, ${nome_completo}, ${data_nasc}, ${celular}, ${email}, ${username}, ${senha}, ${cep}, ${endereco}, ${numero}, ${bairro}, ${cidade}, ${uf} )`;
   }
-  async registerProd(prod) {
-    const idProd = randomUUID();
-    const {
-      nome_prod,
-      descricao,
-      classificacao,
-      id_categoria,
-      preco,
-      qnt,
-      peso,
-      desconto,
-      preco_desconto,
-      qnt_parcelas,
-      valor_parcela,
-      frete,
-      valor_frete,
-    } = prod;
-    await sql`INSERT INTO tbl_prod (
-      id_prod,
-      nome_prod,
-      descricao,
-      classificacao,
-      id_categoria,
-      preco,
-      qnt,
-      peso,
-      desconto,
-      preco_desconto,
-      qnt_parcelas,
-      valor_parcela,
-      frete,
-      valor_frete) VALUES (${idProd},${nome_prod}, ${descricao}, ${classificacao}, ${id_categoria}, ${preco}, ${qnt}, ${peso}, ${desconto}, ${preco_desconto}, ${qnt_parcelas}, ${valor_parcela}, ${frete}, ${valor_frete} )`;
-  }
+
   async registerCategory(cat) {
     const idCategoria = randomUUID();
     const { descricao } = cat;
@@ -131,7 +124,6 @@ export class DataBasePostgres {
     await sql`INSERT INTO tbl_pedido (id_pedido, id_user_cpf, forma_pagamento, status_pagamento, frete, valor_frete, status_arquivo, arquivo, status_envio, status_envio_descricao, array_produtos, status_pedido, peso_total, valor_total) VALUES (${id}, ${id_user_cpf}, ${forma_pagamento}, ${status_pagamento}, ${frete}, ${valor_frete}, ${status_arquivo}, ${arquivo}, ${status_envio}, ${status_envio_descricao}, ${array_produtos}, ${status_pedido}, ${peso_total}, ${valor_total})`;
     return id;
   }
-
   async createSend({ uuid, storeId, product, quantity, price }) {
     const id = randomUUID();
     await sql`INSERT INTO orders (id, uuid, storeId, product, quantity, price) VALUES (${id}, ${uuid}, ${storeId}, ${product}, ${quantity}, ${price})`;
@@ -192,17 +184,5 @@ export class DataBasePostgres {
       pedido = await sql`SELECT * FROM tbl_pedido`;
     }
     return pedido;
-  }
-
-  async listProd(search) {
-    let produto;
-    if (search) {
-      produto = await sql`SELECT * FROM tbl_prod WHERE id_prod ilike ${
-        "%" + search + "%"
-      }`;
-    } else {
-      produto = await sql`SELECT * FROM tbl_prod`;
-    }
-    return produto;
   }
 }

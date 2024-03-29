@@ -179,7 +179,7 @@ create table orders(
 });*/
 
 
-sql`
+/**sql`
 
 CREATE TABLE tbl_pedido (
   id_pedido TEXT PRIMARY KEY,
@@ -206,7 +206,42 @@ CREATE TABLE tbl_pedido (
 )
 `.then(() => {
   console.log("Tabela criada!");
+}); */
+
+
+
+
+
+
+sql`
+
+CREATE TABLE tbl_produtos (
+    id_prod TEXT PRIMARY KEY,
+    nome_prod VARCHAR(100) NOT NULL,
+    descricao VARCHAR(100) NOT NULL,
+    classificacao VARCHAR(30) NOT NULL,
+    img VARCHAR(5000) NOT NULL,
+    id_categoria INT,
+    preco DECIMAL(10,2) NOT NULL, -- Usando DECIMAL para armazenar valores monetários
+    qnt INT NOT NULL,
+    qnt_em_estoque INT NOT NULL,
+    peso DECIMAL(10,2), -- Assumindo que peso é uma medida monetária
+    desconto INT NOT NULL,
+    preco_desconto DECIMAL(10,2), -- Usando DECIMAL para armazenar valores monetários
+    qnt_parcelas INT NOT NULL,
+    juros_parcela DECIMAL(5,2) NOT NULL, -- Taxa de juros em percentual, por exemplo, 5.2%.
+    valor_parcela DECIMAL(10,2), -- Usando DECIMAL para armazenar valores monetários
+    frete INT NOT NULL, -- Indica se há cobrança de frete (1 para sim, 0 para não)
+    valor_frete DECIMAL(10,2) NOT NULL, -- Usando DECIMAL para armazenar valores monetários
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_categoria) REFERENCES tbl_categoria(id_cat)
+
+);
+`.then(() => {
+  console.log("Tabela criada!");
 });
+
+
 
 
 
