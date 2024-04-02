@@ -34,7 +34,6 @@ const verifyJWT = async (request, reply) => {
   }
 };
 
-
 /* POST CADASTRO DE PRODUTOS */
 server.post(
   "/registrar/novo/produto/",
@@ -58,6 +57,7 @@ server.post(
       valor_parcela,
       frete,
       valor_frete,
+      fav_auth,
     } = request.body;
 
     try {
@@ -79,6 +79,7 @@ server.post(
         valor_parcela,
         frete,
         valor_frete,
+        fav_auth,
       });
       return response
         .status(201)
@@ -89,10 +90,29 @@ server.post(
     }
   }
 );
-
 /** GET LISTA DE PRODUTOS CADASTRADO */
+server.get("/lista/produtos", { preHandler: verifyJWT }, async (request, reply) => {
+  try {
+    const search = request.query.search;
 
-server.get("/lista/prdoutos", { preHandler: verifyJWT }, async (request, reply) => {
+    const prod = await database.listaDeProdCadatrado(search);
+    return reply.send(prod);
+  } catch {
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+});
+  /**EDITAR FAVORITO DO PRODUTO */
+server.put("/produtos/:id_prod", async (request, reply) => {
+  const prodId = request.params.id_prod;
+  const { fav_auth } = request.body;
+
+  await database.updateFavoritoProd(prodId, {
+    fav_auth,
+  });
+  return reply.status(204).send();
+});
+/* POST CADASTRO DE PRODUTOS SEM AUTENTICAÇÃO */
+server.get("/produtos", async (request, reply) => {
   try {
     const search = request.query.search;
 

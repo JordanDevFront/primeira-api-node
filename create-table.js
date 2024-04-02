@@ -213,6 +213,8 @@ CREATE TABLE tbl_pedido (
 
 
 
+
+
 sql`
 
 CREATE TABLE tbl_produtos (
@@ -233,6 +235,7 @@ CREATE TABLE tbl_produtos (
     valor_parcela DECIMAL(10,2), -- Usando DECIMAL para armazenar valores monetários
     frete INT NOT NULL, -- Indica se há cobrança de frete (1 para sim, 0 para não)
     valor_frete DECIMAL(10,2) NOT NULL, -- Usando DECIMAL para armazenar valores monetários
+    fav_auth INT,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_categoria) REFERENCES tbl_categoria(id_cat)
 

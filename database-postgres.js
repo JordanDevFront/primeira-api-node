@@ -26,6 +26,7 @@ export class DataBasePostgres {
       valor_parcela,
       frete,
       valor_frete,
+      fav_auth, // se for 1 o icone de favoritar fica branco, se for 2 o icone favoritar fica amarelo.
     } = prod;
     await sql`INSERT INTO tbl_produtos (
       id_prod,
@@ -42,9 +43,8 @@ export class DataBasePostgres {
       juros_parcela,
       valor_parcela,
       frete,
-      valor_frete) VALUES (${idProd},${nome_prod}, ${descricao}, ${classificacao}, ${img}, ${id_categoria}, ${preco}, ${qnt}, ${qnt_em_estoque}, ${peso}, ${desconto}, ${preco_desconto}, ${qnt_parcelas}, ${juros_parcela}, ${valor_parcela}, ${frete}, ${valor_frete} )`;
+      valor_frete, fav_auth) VALUES (${idProd},${nome_prod}, ${descricao}, ${classificacao}, ${img}, ${id_categoria}, ${preco}, ${qnt}, ${qnt_em_estoque}, ${peso}, ${desconto}, ${preco_desconto}, ${qnt_parcelas}, ${juros_parcela}, ${valor_parcela}, ${frete}, ${valor_frete}, ${fav_auth} )`;
   }
-
   /** LISTA DE PRODUTOS CADASTRADO */
   async listaDeProdCadatrado(search) {
     let produto;
@@ -56,6 +56,11 @@ export class DataBasePostgres {
       produto = await sql`SELECT * FROM tbl_produtos`;
     }
     return produto;
+  }
+  /**EDITAR FAVORITO DO PRODUTO */
+  async updateFavoritoProd(id_prod, ProdutoFav) {
+    const { fav_auth } = ProdutoFav;
+    await sql`UPDATE tbl_produtos set fav_auth = ${fav_auth} WHERE id_prod = ${id_prod}`;
   }
 
   /* API  POST*/

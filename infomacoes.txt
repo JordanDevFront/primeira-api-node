@@ -39,6 +39,7 @@ server.delete("/videos/:id", async (request, reply) => {
 
 
 
+
   async list(search) {
     let videos;
     if (search) {
